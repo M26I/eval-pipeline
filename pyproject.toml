@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eval-pipeline"
+version = "0.1.0"
+description = "Local agentic RAG system with reference-based evaluation harness"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "AI Engineer", email = "dev@example.com"}]
+license = {text = "MIT"}
+
+dependencies = [
+    "chromadb>=0.4.0",
+    "sentence-transformers>=2.2.0",
+    "ollama>=0.1.0",
+    "pydantic>=2.0.0",
+    "pytest>=7.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-cov",
+    "black",
+    "ruff",
+]
+
+[tool.setuptools]
+packages = ["src"]
+package-dir = {"" = "."}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100

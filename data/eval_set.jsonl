@@ -1,0 +1,30 @@
+{"query": "Who was Margriet Dekker?", "relevant_ids": ["margriet_dekker"], "required_substrings": ["interior", "1851"]}
+{"query": "When was Margriet Dekker born and when did she die?", "relevant_ids": ["margriet_dekker"], "required_substrings": ["1851", "1919"]}
+{"query": "What is Margriet Dekker's most famous painting?", "relevant_ids": ["margriet_dekker", "woman_reading_north_window"], "required_substrings": ["Woman Reading by a North Window", "1883"]}
+{"query": "Who was Pieter van Loon?", "relevant_ids": ["pieter_van_loon"], "required_substrings": ["marine", "1828"]}
+{"query": "What is Pieter van Loon's best-known painting?", "relevant_ids": ["pieter_van_loon"], "required_substrings": ["Grey Sea, Low Tide", "1867"]}
+{"query": "Where was Pieter van Loon born?", "relevant_ids": ["pieter_van_loon"], "required_substrings": ["Zeewijk"]}
+{"query": "What is the Aalderen School?", "relevant_ids": ["aalderen_school"], "required_substrings": ["landscape", "interior"]}
+{"query": "Who coined the name Aalderen School and in what year?", "relevant_ids": ["aalderen_school"], "required_substrings": ["Willem Aarts", "1924"]}
+{"query": "What are the two generations of the Aalderen School?", "relevant_ids": ["aalderen_school"], "required_substrings": ["marine", "interior"]}
+{"query": "When was the Verhoeven Museum founded and by whom?", "relevant_ids": ["verhoeven_museum"], "required_substrings": ["1911", "Cornelis Verhoeven"]}
+{"query": "How many works are in the Verhoeven Museum's permanent collection?", "relevant_ids": ["verhoeven_museum"], "required_substrings": ["412"]}
+{"query": "Who is the current director of the Verhoeven Museum?", "relevant_ids": ["verhoeven_museum"], "required_substrings": ["Saskia Meijer", "2019"]}
+{"query": "When was the Verhoeven Conservation Studio established?", "relevant_ids": ["conservation_studio"], "required_substrings": ["1978"]}
+{"query": "What conservation project was carried out on a van Loon painting in 2004?", "relevant_ids": ["conservation_studio"], "required_substrings": ["Grey Sea, Low Tide", "varnish"]}
+{"query": "What technical examination facilities does the conservation studio have?", "relevant_ids": ["conservation_studio"], "required_substrings": ["infrared reflectography", "X-radiography"]}
+{"query": "What are the dimensions of Woman Reading by a North Window?", "relevant_ids": ["woman_reading_north_window"], "required_substrings": ["78", "61"]}
+{"query": "Which days is the Verhoeven Museum closed?", "relevant_ids": ["visiting_information"], "required_substrings": ["Mondays"]}
+{"query": "Is photography allowed at the Verhoeven Museum?", "relevant_ids": ["visiting_information"], "required_substrings": ["without flash", "permanent collection"]}
+{"query": "Who taught the painter of Woman Reading by a North Window?", "relevant_ids": ["woman_reading_north_window", "margriet_dekker", "pieter_van_loon"], "required_substrings": ["Pieter van Loon"]}
+{"query": "Which painter trained under the founder of the Aalderen School's first generation?", "relevant_ids": ["aalderen_school", "pieter_van_loon", "margriet_dekker"], "required_substrings": ["Margriet Dekker"]}
+{"query": "Where is the largest collection of Aalderen School works held?", "relevant_ids": ["aalderen_school", "verhoeven_museum"], "required_substrings": ["Verhoeven Museum"]}
+{"query": "What year did van Loon's eyesight begin to affect his output?", "relevant_ids": ["pieter_van_loon"], "required_substrings": ["1890"]}
+{"query": "How much does admission to the Verhoeven Museum cost?", "relevant_ids": [], "required_substrings": []}
+{"query": "Who is the sitter in Woman Reading by a North Window?", "relevant_ids": [], "required_substrings": []}
+{"query": "What does the painting The Blue Kitchen depict?", "relevant_ids": [], "required_substrings": []}
+{"query": "When was the architect Hendrik Bos born?", "relevant_ids": [], "required_substrings": []}
+{"query": "Who is the third major painter of the Aalderen School?", "relevant_ids": [], "required_substrings": []}
+{"query": "What is the capital of France?", "relevant_ids": [], "required_substrings": []}
+{"query": "How many paintings did Margriet Dekker sell during her lifetime?", "relevant_ids": [], "required_substrings": []}
+{"query": "What is the phone number of the Verhoeven Museum?", "relevant_ids": [], "required_substrings": []}
