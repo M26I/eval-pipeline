@@ -97,7 +97,6 @@ One non-abstained answer exhibited a faithfulness failure where the 3B model tru
 
 The application is containerised and deployment-ready, and is currently run locally rather than hosted. This is a deliberate cost and effort decision after free hosting for heavier ML Docker workloads became impractical, not a limitation of the system design.
 
-Demo video placeholder: [Add short demo recording link](#)
 
 ## How to Run
 
