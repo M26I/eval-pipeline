@@ -33,14 +33,14 @@ RUN pip install --no-cache-dir --upgrade pip \
 RUN python -m src.ingest
 
 # ── Runtime configuration ─────────────────────────────────────────────────────
-# Expose the default port (Render overrides with $PORT at runtime)
+# Expose the default application port.
 EXPOSE 8000
 
-# LLM_PROVIDER and GROQ_API_KEY must be set in the host dashboard as secrets.
+# LLM_PROVIDER and GROQ_API_KEY are provided via runtime environment variables.
 # They are NOT baked into this image.
 ENV LLM_PROVIDER=groq
 
 # ── Start the API ─────────────────────────────────────────────────────────────
-# Read PORT from the environment (Render sets this dynamically).
-# Default to 8000 when running locally.
+# Read PORT from the environment.
+# Default to 8000 when PORT is unset.
 CMD ["sh", "-c", "uvicorn src.api:app --host 0.0.0.0 --port ${PORT:-8000}"]

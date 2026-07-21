@@ -2,9 +2,9 @@
 
 ## Overview
 
-A reference-based evaluation system for retrieval-augmented generation (RAG) that runs entirely offline on CPU. The project treats evaluation as the primary artefact: the RAG pipeline exists to create a concrete system to measure. The design philosophy is *fail closed* — abstain rather than fabricate when the corpus cannot support an answer.
+A reference-based evaluation system for retrieval-augmented generation (RAG), wrapped in a FastAPI service and containerised with Docker. The project treats evaluation as the primary artefact: the RAG pipeline exists to create a concrete system to measure. The design philosophy is fail closed: abstain rather than fabricate when the corpus cannot support an answer.
 
-Runs on Intel i7 with 16 GB RAM using Ollama (local LLM inference), sentence-transformers (local embeddings), and Chroma (persistent vector store). No API keys, no data egress.
+Runs on Intel i7 with 16 GB RAM using Ollama (local LLM inference), sentence-transformers (local embeddings), and Chroma (persistent vector store). Runs fully locally with no API key and no data egress by default; a hosted Groq option is available via environment variables.
 
 ## Architecture
 
@@ -23,6 +23,14 @@ EVALUATION
   → Aggregate statistics over labelled eval set → JSON results
 ```
 
+## Interfaces
+
+The same system can be used in three ways:
+
+- **CLI:** `python -m src.pipeline "<question>"`
+- **Web API (FastAPI):** `POST /ask` for live answers, `GET /examples` for cached sample answers, and `GET /health` for service checks
+- **Static landing page:** simple single-page UI served at `GET /` that reads from `/examples` and calls `/ask`
+
 ## Key Design Decisions
 
 **1. Reference-based metrics over LLM-as-judge**
@@ -35,11 +43,11 @@ Two-tier abstention: hard gate refuses before calling the LLM when best retrieva
 
 **3. Provider abstraction for multi-backend support**
 
-LLMProvider abstract base class with OllamaProvider implementation. Generate and retrieve logic does not import provider directly; swapping to a hosted model requires only a new provider implementation and a config change. Trade-off: abstraction adds minimal scaffolding; the pattern scales if adding multiple backends.
+LLMProvider abstract base class with OllamaProvider and GroqProvider implementations. Ollama is the default for local runs, and Groq can be selected through environment variables. Generate and retrieve logic does not import provider directly, so switching backend does not require changes to retrieval or generation code. Trade-off: abstraction adds minimal scaffolding; the pattern scales if adding multiple backends.
 
-**4. Fully local pipeline**
+**4. Local-first execution**
 
-No egress, no rate limits, no external dependencies. Reproducible evaluation on the same hardware. Trade-off: constrained to single-machine resources; latency on CPU is high (9.4 s mean, 25.3 s p95 per query).
+Default execution is fully local with no egress, no rate limits, and no external dependencies for local runs. A hosted Groq path is optional when selected via environment variables. Trade-off: local CPU inference is constrained to single-machine resources, with higher latency (9.4 s mean, 25.3 s p95 per query).
 
 ## Results
 
@@ -85,6 +93,12 @@ One non-abstained answer exhibited a faithfulness failure where the 3B model tru
 - Optional LLM-as-judge variant over a small subset of questions as a baseline.
 - Multilingual retrieval variant (cross-lingual embeddings).
 
+## Deployment
+
+The application is containerised and deployment-ready, and is currently run locally rather than hosted. This is a deliberate cost and effort decision after free hosting for heavier ML Docker workloads became impractical, not a limitation of the system design.
+
+Demo video placeholder: [Add short demo recording link](#)
+
 ## How to Run
 
 **Setup:**
@@ -105,6 +119,17 @@ python -m src.ingest
 python -m src.pipeline "Who was Margriet Dekker?"
 ```
 
+**Run API locally (FastAPI):**
+```bash
+uvicorn src.api:app --host 0.0.0.0 --port 8000
+```
+
+**Build and run Docker image:**
+```bash
+docker build -t eval-pipeline .
+docker run --rm -p 8000:8000 -e LLM_PROVIDER=groq -e GROQ_API_KEY=<your_key> eval-pipeline
+```
+
 **Run full evaluation:**
 ```bash
 python -m src.evals.run_eval
@@ -117,11 +142,12 @@ Evaluation output is printed to stdout and saved as a timestamped JSON file to `
 ```
 src/
   config.py           — Pydantic settings (model names, paths, thresholds)
-  providers.py        — LLMProvider abstract class, OllamaProvider impl
+  providers.py        — LLMProvider abstraction (Ollama, Groq, provider factory)
   ingest.py           — Chunk, embed, store in Chroma
   retrieve.py         — Query → cosine similarity search → top-k
   generate.py         — Retrieved chunks + LLM → answer, abstention flag
   pipeline.py         — Orchestration: retrieve + generate + latency
+  api.py              — FastAPI wrapper and landing page endpoints
   evals/
     metrics.py        — Pure functions: hit rate, abstention correctness, faithfulness
     run_eval.py       — Load eval set, run pipeline, aggregate results
@@ -141,7 +167,11 @@ results/
 
 - Python 3.11+
 - Ollama (local LLM daemon)
+- Groq (hosted LLM option via environment variables)
 - chromadb 0.4.x
 - sentence-transformers (all-MiniLM-L6-v2)
+- fastapi
+- uvicorn
+- python-dotenv
 - pydantic v2+
 - pytest (dev)
