@@ -13,17 +13,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Python dependencies ──────────────────────────────────────────────────────
-# Copy only the files needed for dependency installation first (layer caching)
-COPY pyproject.toml ./
-
-# Install the project and all its dependencies
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -e .
-
-# ── Application source and data ──────────────────────────────────────────────
+# ── Application source and packaging files ───────────────────────────────────
+# Copy packaging metadata and source before installation.
+# setup tooling reads src/ and README.md while building the package.
+COPY pyproject.toml README.md ./
 COPY src/ ./src/
 COPY data/ ./data/
+
+# ── Python dependencies ──────────────────────────────────────────────────────
+# Install the project and all its dependencies into the image.
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch \
+ && pip install --no-cache-dir .
 
 # ── Build the Chroma vector store ────────────────────────────────────────────
 # Runs the ingest step at image build time so the Chroma database is baked
