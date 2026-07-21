@@ -1,0 +1,30 @@
+# Secrets — never copy into the image
+.env
+
+# Local runtime artefacts
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Version control
+.git/
+.gitignore
+
+# Local Chroma DB (rebuilt during docker build via src.ingest)
+chroma_data/
+
+# Evaluation results — not needed at runtime
+results/
+
+# Dev / test files
+tests/
+scripts/
+test_groq_smoke.py
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+*.swp

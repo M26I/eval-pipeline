@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local RAG Evaluation Harness</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid #d0d0d0;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.25rem;
+    }
+    header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.5rem;
+      color: #111;
+    }
+    .tagline {
+      color: #444;
+      margin-bottom: 0.6rem;
+    }
+    .host-note {
+      font-size: 0.85rem;
+      color: #666;
+      background: #efefef;
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Section headings ─────────────────────────────────────── */
+    section { margin-bottom: 2.5rem; }
+    h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Cards ────────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 0.9rem;
+    }
+    .card-question {
+      font-weight: 600;
+      font-size: 0.97rem;
+      color: #111;
+      margin-bottom: 0.55rem;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.18rem 0.55rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .badge-answered  { background: #d4edda; color: #155724; border: 1px solid #b1dfbb; }
+    .badge-abstained { background: #fff3cd; color: #7d5a00; border: 1px solid #ffd96a; }
+    .badge-refused   { background: #fde9d9; color: #7a3800; border: 1px solid #f8b88a; }
+    .sources-label {
+      font-size: 0.78rem;
+      color: #888;
+    }
+    .card-answer {
+      color: #222;
+      margin-bottom: 0.65rem;
+      white-space: pre-wrap;
+    }
+    .card-note {
+      font-size: 0.78rem;
+      color: #888;
+      font-style: italic;
+      border-top: 1px solid #eee;
+      padding-top: 0.55rem;
+      margin-top: 0.4rem;
+    }
+    .card-latency {
+      font-size: 0.78rem;
+      color: #999;
+      margin-top: 0.35rem;
+    }
+
+    /* ── Ask form ─────────────────────────────────────────────── */
+    .slow-notice {
+      font-size: 0.82rem;
+      color: #888;
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 0.45rem 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .input-wrap {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrap input {
+      width: 100%;
+      padding: 0.58rem 2.2rem 0.58rem 0.85rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 0.97rem;
+      font-family: inherit;
+      color: #111;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .input-wrap input:focus { border-color: #888; }
+    .clear-btn {
+      position: absolute;
+      right: 0.5rem;
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0.1rem 0.2rem;
+      display: none;
+    }
+    .clear-btn:hover { color: #555; }
+    .input-row button {
+      padding: 0.58rem 1.2rem;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .input-row button:hover:not(:disabled) { background: #333; }
+    .input-row button:disabled { background: #999; cursor: not-allowed; }
+
+    /* ── Live result badge ──────────────────────────────────────── */
+    .badge-live {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #e8eaf6;
+      color: #3949ab;
+      border: 1px solid #9fa8da;
+      white-space: nowrap;
+    }
+
+    /* ── Status / error states ────────────────────────────────── */
+    .loading-msg {
+      color: #666;
+      font-size: 0.9rem;
+      padding: 0.5rem 0;
+    }
+    .error-card {
+      background: #fff8f5;
+      border-color: #f5c6a8;
+    }
+    .error-card p { margin-bottom: 0.4rem; }
+    .error-card p:last-child { margin-bottom: 0; color: #666; font-size: 0.88rem; }
+
+    /* ── Skeleton loaders ─────────────────────────────────────── */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position: 600px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #eee 25%, #e0e0e0 50%, #eee 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.3s infinite;
+      border-radius: 4px;
+      height: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .skeleton.wide  { width: 100%; }
+    .skeleton.medium { width: 70%; }
+    .skeleton.narrow { width: 40%; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <header>
+    <h1>Local RAG Evaluation Harness</h1>
+    <p class="tagline">
+      A retrieval system built to say "I don't know" rather than fabricate, with a
+      reference-based evaluation harness measuring retrieval accuracy, abstention
+      correctness, and answer faithfulness across a labelled question set.
+    </p>
+    <span class="host-note">
+      Runs fully locally on Ollama by default &mdash; this hosted demo uses Groq for public availability.
+    </span>
+  </header>
+
+  <!-- ── Pre-computed examples ───────────────────────────── -->
+  <section>
+    <h2>Example answers</h2>
+    <div id="examples-container">
+      <!-- Skeleton while fetch is in flight -->
+      <div class="card" id="skel-1">
+        <div class="skeleton wide"></div>
+        <div class="skeleton medium"></div>
+        <div class="skeleton narrow"></div>
+      </div>
+      <div class="card" id="skel-2">
+        <div class="skeleton wide"></div>
+        <div class="skeleton medium"></div>
+        <div class="skeleton narrow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Live ask ─────────────────────────────────────────── -->
+  <section>
+    <h2>Try your own question</h2>
+    <p class="slow-notice">
+      The live demo may take up to a minute on first use &mdash; the free host sleeps when idle.
+      If it times out, try again or see the pre-computed examples above.
+    </p>
+    <div class="input-row">
+      <div class="input-wrap">
+        <input type="text" id="question-input"
+               placeholder="Ask something about the Verhoeven Museum corpus&hellip;" />
+        <button class="clear-btn" id="clear-btn" title="Clear" onclick="clearInput()">&times;</button>
+      </div>
+      <button id="ask-btn" onclick="askQuestion()">Ask</button>
+    </div>
+    <div id="ask-result"></div>
+  </section>
+
+  <!-- ── Live results ──────────────────────────────────── -->
+  <section id="live-section" style="display:none">
+    <h2>Your questions</h2>
+    <div id="live-results"></div>
+  </section>
+
+</div>
+
+<script>
+  /* ── Utilities ──────────────────────────────────────────────── */
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function badgeHtml(abstained, softRefused) {
+    if (abstained) {
+      return '<span class="badge badge-abstained">Abstained (hard gate)</span>';
+    }
+    if (softRefused) {
+      return '<span class="badge badge-refused">Declined at generation</span>';
+    }
+    return '<span class="badge badge-answered">Answered</span>';
+  }
+
+  function sourcesHtml(sources) {
+    if (!sources || sources.length === 0) return '';
+    return '<span class="sources-label">Sources: ' + esc(sources.join(', ')) + '</span>';
+  }
+
+  function renderCard(data, opts) {
+    opts = opts || {};
+    const answer      = data.answer || '';
+    const abstained   = !!data.abstained;
+    const softRefused = !abstained && opts.softRefused;
+    const liveBadge   = opts.live ? '<span class="badge-live">Live</span>' : '';
+
+    return `
+      <div class="card${opts.errorCard ? ' error-card' : ''}">
+        <div class="card-question">${esc(data.question || '')}</div>
+        <div class="card-meta">
+          ${badgeHtml(abstained, softRefused)}
+          ${liveBadge}
+          ${sourcesHtml(data.sources)}
+        </div>
+        <div class="card-answer">${esc(answer)}</div>
+        ${data.note    ? `<div class="card-note">${esc(data.note)}</div>` : ''}
+        ${opts.latency ? `<div class="card-latency">Latency: ${opts.latency} ms</div>` : ''}
+      </div>`;
+  }
+
+  /* ── Load pre-computed examples ─────────────────────────────── */
+  async function loadExamples() {
+    const container = document.getElementById('examples-container');
+    try {
+      const res = await fetch('/examples');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const examples = await res.json();
+      if (!examples.length) {
+        container.innerHTML = '<p style="color:#888;font-size:.9rem">No examples available.</p>';
+        return;
+      }
+      container.innerHTML = examples.map(ex => renderCard(ex)).join('');
+    } catch (_) {
+      container.innerHTML =
+        '<p style="color:#999;font-size:.88rem">Could not load examples.</p>';
+    }
+  }
+
+  /* ── Live ask ───────────────────────────────────────────────── */
+  async function askQuestion() {
+    const input     = document.getElementById('question-input');
+    const resultDiv = document.getElementById('ask-result');
+    const btn       = document.getElementById('ask-btn');
+
+    const question = input.value.trim();
+    if (!question) { input.focus(); return; }
+
+    btn.disabled = true;
+    resultDiv.innerHTML =
+      '<p class="loading-msg">Thinking&hellip; (may take up to a minute on first use)</p>';
+
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 120000);
+
+    try {
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+        signal: controller.signal,
+      });
+      clearTimeout(tid);
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      const data = await res.json();
+      // Append live result into the dedicated "Your questions" section
+      const liveSection  = document.getElementById('live-section');
+      const liveResults  = document.getElementById('live-results');
+      const cardHtml = renderCard(
+        { question, answer: data.answer, abstained: data.abstained, sources: data.sources },
+        { latency: Math.round(data.latency_ms), live: true }
+      );
+      liveSection.style.display = 'block';
+      liveResults.insertAdjacentHTML('afterbegin', cardHtml);
+      resultDiv.innerHTML = '';
+      clearInput();
+
+    } catch (e) {
+      clearTimeout(tid);
+      resultDiv.innerHTML = `
+        <div class="card error-card">
+          <p><strong>The demo did not respond in time.</strong></p>
+          <p>The free host may still be waking up, or it is temporarily rate-limited.
+             Please try again in a moment, or review the pre-computed examples at the top of this page.</p>
+        </div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ── Clear button ───────────────────────────────────────────── */
+  function clearInput() {
+    const input = document.getElementById('question-input');
+    const clearBtn = document.getElementById('clear-btn');
+    input.value = '';
+    clearBtn.style.display = 'none';
+    input.focus();
+  }
+
+  document.getElementById('question-input').addEventListener('input', function () {
+    document.getElementById('clear-btn').style.display =
+      this.value.length > 0 ? 'block' : 'none';
+  });
+
+  document.getElementById('question-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') askQuestion();
+    if (e.key === 'Escape') clearInput();
+  });
+
+  loadExamples();
+</script>
+</body>
+</html>

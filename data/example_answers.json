@@ -1,0 +1,40 @@
+[
+  {
+    "question": "Who was Pieter van Loon?",
+    "answer": "Pieter van Loon (1828–1901) was a marine and coastal painter, regarded as one of the founders of the Aalderen School.",
+    "abstained": false,
+    "sources": [
+      "verhoeven_museum",
+      "pieter_van_loon"
+    ],
+    "note": "Answered (abstained=false): retrieval hit a single primary source; model returned a direct biographical answer from the corpus."
+  },
+  {
+    "question": "Who taught the painter of Woman Reading by a North Window?",
+    "answer": "Pieter van Loon.",
+    "abstained": false,
+    "sources": [
+      "woman_reading_north_window",
+      "pieter_van_loon",
+      "margriet_dekker"
+    ],
+    "note": "Answered (abstained=false): required linking three documents — painting record to artist biography to teacher — demonstrating multi-source retrieval."
+  },
+  {
+    "question": "Who is the sitter in Woman Reading by a North Window?",
+    "answer": "The identity of the sitter in \"Woman Reading by a North Window\" is unknown. It has been suggested that the figure may be Margriet Dekker's younger sister, but there is no documentary evidence to support this claim and the museum only describes the sitter as unidentified.",
+    "abstained": false,
+    "sources": [
+      "woman_reading_north_window",
+      "margriet_dekker"
+    ],
+    "note": "Generation-stage refusal (abstained=false): the hard gate did not fire because topically relevant chunks were retrieved, but the model correctly declined to state the specific fact because it is absent from the corpus. This is a soft refusal at generation rather than gate-stage abstention."
+  },
+  {
+    "question": "What is the capital of France?",
+    "answer": "I don't know based on the available documents.",
+    "abstained": true,
+    "sources": [],
+    "note": "Hard abstention (abstained=true): the retrieval distance gate fired before the LLM was called because no relevant chunks were found. The system refused without making a model call."
+  }
+]

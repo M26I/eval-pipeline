@@ -1,7 +1,7 @@
 """Generation module for RAG responses."""
 
 from src.config import settings
-from src.providers import OllamaProvider
+from src.providers import get_provider
 
 # Prompt template for in-context generation
 GENERATION_PROMPT = """You are a helpful assistant answering questions based on provided documents.
@@ -55,7 +55,7 @@ def generate_answer(query: str, retrieved_chunks: list[dict]) -> dict:
     
     # Build prompt and generate
     prompt = GENERATION_PROMPT.format(context=context, question=query)
-    provider = OllamaProvider(model=settings.llm_model)
+    provider = get_provider()
     answer = provider.generate(prompt)
     
     # Extract unique doc_ids from sources

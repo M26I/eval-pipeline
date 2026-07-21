@@ -14,6 +14,14 @@ class Settings(BaseModel):
         default="llama3.2:3b",
         description="Ollama model identifier for generation"
     )
+    groq_model: str = Field(
+        default="llama-3.3-70b-versatile",
+        description="Groq-hosted model identifier (used when llm_provider='groq')"
+    )
+    llm_provider: str = Field(
+        default="ollama",
+        description="LLM provider: 'ollama' (local) or 'groq' (hosted)"
+    )
     embedding_model: str = Field(
         default="all-MiniLM-L6-v2",
         description="HuggingFace model identifier for embeddings"

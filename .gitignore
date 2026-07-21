@@ -48,3 +48,4 @@ chroma_data/
 *.db
 *.sqlite3
 .chroma/
+.env
